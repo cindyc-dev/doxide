@@ -17,7 +17,24 @@
 		"commands": [
 			{
 				"command": "doxide.helloWorld",
-				"title": "Hello World"
+				"title": "Hello World",
+				"category": "Doxide"
+			},
+			{
+				"command": "doxide.enableCodeLens",
+				"title": "Enable Code Lens",
+				"category": "Doxide"
+			},
+			{
+				"command": "doxide.disableCodeLens",
+				"title": "Disable Code Lens",
+				"category": "Doxide"
+			},
+			{
+				"command": "doxide.generateDocstring",
+				"title": "Generate Docstring",
+				"category": "Doxide"
+			},
 			}
 		]
 	},
