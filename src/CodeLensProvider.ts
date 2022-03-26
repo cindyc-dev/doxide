@@ -11,12 +11,23 @@ import {
     SymbolKind,
     DocumentSymbol,
     SelectionRange,
+    Range,
+    Command,
+    window
 } from "vscode";
 
 /**
  * 'Generate Docstring' CodeLens
  */
-export class DocstringCodeLens extends CodeLens {}
+export class DocstringCodeLens extends CodeLens {
+    constructor(
+        public readonly contentRange: Range,
+        range: Range,
+        command?: Command | undefined,
+    ) {
+        super(range, command);
+    }
+}
 
 /**
  * 'Previous' CodeLens
@@ -87,10 +98,9 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
         if (symbols !== undefined) {
             // Loop through all of the DocumentSymbols
             for (const symbol of symbols) {
-                this.provideCodeLens(lenses, document, symbol);
+                this.provideCodeLensHelper(lenses, document, symbol);
             }
         }
-
         console.log(`Rendering ${lenses.length} CodeLenses!`);
         return lenses;
     }
@@ -101,7 +111,7 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
      * @param document
      * @param symbol
      */
-    private provideCodeLens(
+    private provideCodeLensHelper(
         lenses: CodeLens[],
         document: TextDocument,
         symbol: any
@@ -109,13 +119,13 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
         // Check if the symbol is a function and add DocstringCodeLens
         if (symbol.kind === SymbolKind.Function) {
             // console.log(`  Function found: ${JSON.stringify(symbol, null, 2)} | symbol.selectionrange: ${symbol.selectionrange} | symbol.selection_range: ${symbol.selection_range}`);
-            lenses.push(new DocstringCodeLens(symbol.location.range));
+            lenses.push(new DocstringCodeLens(symbol.range, symbol.location.range));
         }
 
         // Recursively call this function on all of the children
         for (const child of symbol.children) {
             console.log(`    Symbol has children!`);
-            this.provideCodeLens(lenses, document, child);
+            this.provideCodeLensHelper(lenses, document, child);
         }
     }
 
@@ -153,11 +163,17 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
         lens: DocstringCodeLens,
         _token: CancellationToken
     ): CodeLens {
+        var editor = window.activeTextEditor;
+        if (!editor) {
+            return lens; // No open text editor
+        }
+        // console.log(`lens.contentRange: ${lens.contentRange}`);
+        var text = editor.document.getText(lens.contentRange);
         lens.command = {
             title: "Generate",
             tooltip: "Generate a Docstring for this function.",
             command: "doxide.generateDocstring",
-            arguments: [], // TODO set text argument to be the function
+            arguments: [text], // TODO set text argument to be the function
         };
         return lens;
     }

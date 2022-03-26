@@ -1,7 +1,13 @@
 {
-  "name": "doxide",
-	"displayName": "doxide",
-	"description": "Automate code documentation using OpenAI-Codex",
+	"name": "doxide",
+	"displayName": "Doxide",
+	"description": "🤖 Automate code documentation using OpenAI-Codex",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/chuahxinyu/doxide"
+	},
+  	"license": "MIT",
+	"publisher": "Chuah Xin Yu",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.65.0"
@@ -10,7 +16,7 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:doxide.helloWorld"
+		"*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -35,6 +41,98 @@
 				"title": "Generate Docstring",
 				"category": "Doxide"
 			},
+			{
+				"command": "doxide.setOpenAIapiKey",
+				"title": "Set OpenAI API Key",
+				"category": "Doxide"
+			}
+		],
+		"menus": {},
+		"keybindings": [
+			{
+				"command": "gitlens.key.left",
+				"key": "left",
+				"when": "gitlens:key:left"
+			}
+		],
+		"configuration": [
+			{
+				"id": "openai-api-key",
+				"title": "OpenAI API Key",
+				"properties": {
+					"#TODOdoxide.openAI.enabled": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "*Specifies whether to use OpenAI-Codex to generate docstrings and comments.* If disabled, OpenAI-Codex will not be used and the `Generate Docstring` command will generate a skeleton docstring."
+					},
+					"doxide.openAI.apiKey": {
+						"type": "string",
+						"default": "",
+						"markdownDescription": "*Your OpenAI API key.* [Learn more.](Link)"
+					},
+					"doxide.openAI.rememberApiKey.enabled": {
+						"type": "boolean",
+						"default": null,
+						"markdownDescription": "*Specifies whether to remember your API Key and store it in your User Workspace Settings.* If disabled, Doxide will prompt you to enter your API Key, either via a Popup or by using the command `Set OpenAI API Key`, whenever VSCode is reopened or refreshed."
+					}
+				}
+			},
+			{
+				"id": "openai-config",
+				"title": "OpenAI Configuration",
+				"properties": {
+					"doxide.openAI.config.temperature": {
+						"type": "number",
+						"default": 0.1,
+						"markdownDescription": "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.",
+						"examples": [],
+						"minimum": 0,
+						"maximum": 1
+					},
+					"doxide.openAI.config.n": {
+						"type": "integer",
+						"default": 5,
+						"markdownDescription": "How many completions to generate for each prompt."
+					},
+					"doxide.openAI.config.presencePenalty": {
+						"type": "number",
+						"default": 0.1,
+						"markdownDescription": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.",
+						"examples": [],
+						"minimum": -2,
+						"maximum": 2
+					},
+					"doxide.openAI.config.frequencyPenalty": {
+						"type": "number",
+						"default": 0.1,
+						"markdownDescription": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.",
+						"examples": [],
+						"minimum": -2,
+						"maximum": 2
+					}
+				}
+			},
+			{
+				"id": "code-lens",
+				"title": "Code Lens",
+				"properties": {
+					"doxide.codeLens.enabled": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "*Specifies whether to provide any Doxide Code Lens by default.* If enabled, Code Lenses (grey text) will be shown at the beginning of functions and methods with prompts for generating docstrings. Use the `Toggle Doxide Code Lens` command (`doxide.toggleCodeLens`) to toggle the Doxide code lens on and off for the current window."
+					}
+				}
+			},
+			{
+				"id": "#TODOdocstring-templates",
+				"title": "Docstring Templates",
+				"properties": {
+				"doxide.python.docstringTemplate": {
+					"type": "text",
+					"default": "#TODO",
+					"markdownDescription": "#TODO"
+				}
+				}
 			}
 		]
 	},
@@ -47,16 +145,19 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.65.0",
 		"@types/glob": "^7.1.4",
 		"@types/mocha": "^9.0.0",
 		"@types/node": "14.x",
+		"@types/vscode": "^1.65.0",
 		"@typescript-eslint/eslint-plugin": "^5.1.0",
 		"@typescript-eslint/parser": "^5.1.0",
+		"@vscode/test-electron": "^1.6.2",
 		"eslint": "^8.1.0",
 		"glob": "^7.1.7",
 		"mocha": "^9.1.3",
-		"typescript": "^4.4.4",
-		"@vscode/test-electron": "^1.6.2"
+		"typescript": "^4.4.4"
+	},
+	"dependencies": {
+		"axios": "^0.26.1"
 	}
 }
