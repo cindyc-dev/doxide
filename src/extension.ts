@@ -1,4 +1,4 @@
-import { commands, Disposable, window, languages, workspace, ProgressLocation } from "vscode";
+import { commands, Disposable, window, languages, workspace, ProgressLocation, Range } from "vscode";
 import { DoxideCodeLensProvider } from "./CodeLensProvider";
 import { openaiGenerateDocstring } from "./openai";
 
@@ -9,10 +9,11 @@ export function activate() {
 	
 	const authKey: string | undefined = workspace
 		.getConfiguration("doxide")
-		.get("doxide.openAI.apiKey");
+		.get("openAI.apiKey");
 
+	console.log(`authKey: ${authKey}`);
 	// Check if OpenAI API Key is set
-	if (!authKey || authKey===undefined) {
+	if (!authKey || authKey === undefined) {
 		showAuthKeyWarningMessage();
 	}
 
@@ -46,7 +47,7 @@ export function activate() {
 		window.showInputBox({
 			title: `Enter your OpenAI API Key:`,
 			prompt: `Enter your OpenAI API Key`,
-			password: true,
+			// password: true,
 			ignoreFocusOut: true,
 			validateInput: (text) => {
 				if (!text) {
@@ -55,46 +56,55 @@ export function activate() {
 					return null;
 				}
 			}
-		}).then((newKey) => {
+		})
+		.then((newKey) => {
 			// Remember API Key - not yet configured
-			if (workspace.getConfiguration("doxide").get("openAI.rememberApiKey.enabled") === null) {
-				window.showInputBox({
-					title: `Would you like Doxide to remember your API Key and store it in your global seetings?`,
-					prompt: `Yes / No`,
-					ignoreFocusOut: true,
-					validateInput: (text) => {
-						if ((['y', 'yes', 'n', 'no']).includes(text.toLowerCase())) {
-							return `⚠️ Please enter either 'Yes' or 'No'.`;
-						} else {
-							return null;
-						}
-					}
-				}).then((text) => {
-					if (text && (['y', 'yes']).includes(text.toLowerCase())) {
-						workspace.getConfiguration("doxide").update("openAI.rememberApiKey.enabled", true, true);
-					} else {
-						workspace.getConfiguration("doxide").update("openAI.rememberApiKey.enabled", false, true);
-					}
-				});
-			}
+			// console.log(`rememberApiKey: ${workspace.getConfiguration("doxide").get("openAI.rememberApiKey.enabled")}`);
+			// if (workspace.getConfiguration("doxide").get("openAI.rememberApiKey.enabled") === null) {
+			// 	window.showInputBox({
+			// 		title: `Would you like Doxide to remember your API Key and store it in your global seetings?`,
+			// 		prompt: `Yes / No`,
+			// 		ignoreFocusOut: true,
+			// 		validateInput: (text) => {
+			// 			if ((['y', 'yes', 'n', 'no']).includes(text.toLowerCase())) {
+			// 				return `⚠️ Please enter either 'Yes' or 'No'.`;
+			// 			} else {
+			// 				return null;
+			// 			}
+			// 		}
+			// 	}).then((text) => {
+			// 		if (text && (['y', 'yes']).includes(text.toLowerCase())) {
+			// 			workspace.getConfiguration("doxide").update("openAI.rememberApiKey.enabled", true, true);
+			// 		} else {
+			// 			workspace.getConfiguration("doxide").update("openAI.rememberApiKey.enabled", false, true);
+			// 		}
+			// 	});
+			// }
 
 			// Remember API Key - store in User Configuration
-			if (workspace.getConfiguration("doxide").get("openAI.rememberApiKey.enabled") === true) {
+			// if (workspace.getConfiguration("doxide").get("openAI.rememberApiKey.enabled") === true) {
+
+			// STORE IN GLOBAL USER CONFIGURATION SETTINGS
 				workspace
 					.getConfiguration("doxide")
 					.update("openAI.apiKey", newKey, true);
-			} else { // Don't Remember - store in Workspace Configuration
-				workspace
-					.getConfiguration("doxide")
-					.update("openAI.apiKey", newKey);
-			}
+			// } else { // Don't Remember - store in Workspace Configuration
+			// 	workspace
+			// 		.getConfiguration("doxide")
+			// 		.update("openAI.apiKey", newKey);
+			// }
 			
 		});
 	});
 	
 	/* ------------------------- Generate Docstring ------------------------- */
 	// Command that is run when "Generate Docstring" CodeLens is clicked
-	commands.registerCommand("doxide.generateDocstring", (text: string) => {
+	// TODO insertPoint (where to insert the docstring)
+	commands.registerCommand("doxide.generateDocstring", (text: string, insertPoint?: Range) => {
+		console.log(`[genDocstring] text: ${text}`);
+        console.log(`lens.range: ${JSON.stringify(insertPoint, null, 2)}`);
+
+
 		if (!authKey || authKey === undefined) {
 			var isAuthKeyValid = showAuthKeyWarningMessage();
 		} else {
