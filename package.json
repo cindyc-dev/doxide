@@ -59,8 +59,9 @@
 			{
 				"id": "openai-api-key",
 				"title": "OpenAI API Key",
+				"order": 0,
 				"properties": {
-					"#TODOdoxide.openAI.enabled": {
+					"doxide.openAI.enabled": {
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "*Specifies whether to use OpenAI-Codex to generate docstrings and comments.* If disabled, OpenAI-Codex will not be used and the `Generate Docstring` command will generate a skeleton docstring."
@@ -69,19 +70,49 @@
 						"type": "string",
 						"default": "",
 						"markdownDescription": "*Your OpenAI API key.* [Learn more.](Link)"
-					},
-					"doxide.openAI.rememberApiKey.enabled": {
-						"type": "boolean",
-						"default": null,
-						"markdownDescription": "*Specifies whether to remember your API Key and store it in your User Workspace Settings.* If disabled, Doxide will prompt you to enter your API Key, either via a Popup or by using the command `Set OpenAI API Key`, whenever VSCode is reopened or refreshed."
 					}
 				}
 			},
 			{
 				"id": "openai-config",
 				"title": "OpenAI Configuration",
+				"order": 1,
 				"properties": {
+					"doxide.openAI.engine": {
+						"order": 0,
+						"type": "string",
+						"description": "The engine to be used to generate Docstrings and Comments. Note that Codex models (`code-...`) are in [private beta](https://openai.com/blog/openai-codex/) and GTP-3 models have variable (`text-...`) [Pricing](https://openai.com/api/pricing/).",
+						"default": "code-davinci-001",
+						"enum": [
+							"code-davinci-001",
+							"code-davinci-002",
+							"code-cushman-001",
+							"text-davinci-002",
+							"text-davinci-001",
+							"text-curie-001",
+							"text-babbage-001",
+							"text-ada-001"
+						],
+						"enumDescriptions": [
+							"(Codex Davinci V1) Most capable Codex model. Particularly good at translating natural language to code.",
+							"(Codex Davinci V2) Most capable Codex model. Particularly good at translating natural language to code.",
+							"(Codex Cushman V1) Almost as capable as Davinci Codex, but slightly faster.",
+							"(GPT-3 Davinci V2) Most capable GPT-3 model. Can do any task the other models can do, often with less context.",
+							"(GPT-3 Davinci V1) Most capable GPT-3 model. Can do any task the other models can do, often with less context.",
+							"(GPT-3 Curie V1) Very capable, but faster and lower cost than Davinci.",
+							"(GPT-3 Babbage V1) Capable of straightforward tasks, very fast, and lower cost.",
+							"(GPT-3 Ada V1) Capable of very simple tasks, usually the fastest model in the GPT-3 series, and lowest cost."
+						]
+						
+					},
+					"doxide.openAI.config.n": {
+						"order": 1,
+						"type": "integer",
+						"default": 5,
+						"markdownDescription": "How many completions to generate for each prompt."
+					},
 					"doxide.openAI.config.temperature": {
+						"order": 2,
 						"type": "number",
 						"default": 0.1,
 						"markdownDescription": "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.",
@@ -89,12 +120,8 @@
 						"minimum": 0,
 						"maximum": 1
 					},
-					"doxide.openAI.config.n": {
-						"type": "integer",
-						"default": 5,
-						"markdownDescription": "How many completions to generate for each prompt."
-					},
 					"doxide.openAI.config.presencePenalty": {
+						"order": 3,
 						"type": "number",
 						"default": 0.1,
 						"markdownDescription": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.",
@@ -103,6 +130,7 @@
 						"maximum": 2
 					},
 					"doxide.openAI.config.frequencyPenalty": {
+						"order": 4,
 						"type": "number",
 						"default": 0.1,
 						"markdownDescription": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.",
@@ -115,6 +143,7 @@
 			{
 				"id": "code-lens",
 				"title": "Code Lens",
+				"order": 2,
 				"properties": {
 					"doxide.codeLens.enabled": {
 						"type": "boolean",

@@ -5,7 +5,7 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 import axios from "axios";
-import { workspace } from "vscode";
+import { window, workspace } from "vscode";
 
 /**
  * Makes a post request to OpenAI-Codex API. Returns an array of the responses 
@@ -16,31 +16,43 @@ import { workspace } from "vscode";
  */
 export async function openaiGenerateDocstring(text: string, authKey: string|undefined) {
     console.log(`  OPENAI_API_KEY: ${authKey}`);
-    console.log(`  text: ${text}`);
+    console.log(`  text: ${JSON.stringify(text)}`);
+
+    const additionalPromptText: string = "\n# An elaborate, high quality docstring for the above function:\n\"\"\"";
+
+    const engine: string | undefined = workspace.getConfiguration("doxide").get("openAI.engine");
+    console.log(`  engine: ${engine}`);
+
+    const url = `https://api.openai.com/v1/engines/${engine}/completions`;
+    console.log(`  url: ${url}`);
+
+    const prompt = text + additionalPromptText;
+    console.log(prompt);
 
     // NOTE: The token count of your prompt plus max_tokens cannot exceed the 
     //  model's context length. davinci-codex supports 4096 tokens
     await axios
         .post(
-            "https://api.openai.com/v1/engines/davinci-codex/completions",
+            url,
             {
-                prompt: text,  // TODO add additional prompt text
+                prompt: prompt,
                 // suffix: "",
-                max_tokens: text.length/2,
+                max_tokens: 100,
                 temperature: 0.3,
-                // top_p: 1,
+                top_p: 1,
                 n: workspace.getConfiguration("doxide").get("openAI.config.n"),
-                // stream: false,
-                // logprobs: null,
-                stop: ['"""', "'''"],
-                presence_penalty: 0,
-                frequency_penalty: 0,
+                stream: false,
+                logprobs: null,
+                stop: ["#", "\"\"\"", "'''"],
+                // presence_penalty: 0,
+                // frequency_penalty: 0,
                 // best_of: ,
                 // logit_bias:
             },
             {
                 headers: {
-                    Authorization: `Bearer ${authKey}`,
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authKey}`,
                 },
             }
         )
@@ -52,9 +64,13 @@ export async function openaiGenerateDocstring(text: string, authKey: string|unde
                     2
                 )}`
             );
+            // TODO insert response as docstring
+            return true;
         })
         .catch(function (error: any) {
             console.error(`[openaiGenerateDocstring] error: ${error}`);
+            window.showErrorMessage(`ERROR! Could not generate Docstring`);
+            return false;
         });
 }
 
