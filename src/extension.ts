@@ -10,13 +10,16 @@ export function activate() {
 	
 	const langId = window.activeTextEditor?.document.languageId;
 
-	const authKey: string | undefined = workspace
+	let authKey: string | undefined = workspace
 		.getConfiguration("doxide")
 		.get("openAI.apiKey");
 	console.log(`authKey: ${authKey}`);
 	// Check if OpenAI API Key is set
 	if (!authKey || authKey === undefined) {
 		showAuthKeyWarningMessage();
+		authKey = workspace
+			.getConfiguration("doxide")
+			.get("openAI.apiKey");
 	}
 
 	// TODO yeet this - Command to say hello
@@ -61,56 +64,67 @@ export function activate() {
 		})
 		.then((newKey) => {
 			// Remember API Key - not yet configured
-			// console.log(`rememberApiKey: ${workspace.getConfiguration("doxide").get("openAI.rememberApiKey.enabled")}`);
-			// if (workspace.getConfiguration("doxide").get("openAI.rememberApiKey.enabled") === null) {
-			// 	window.showInputBox({
-			// 		title: `Would you like Doxide to remember your API Key and store it in your global seetings?`,
-			// 		prompt: `Yes / No`,
-			// 		ignoreFocusOut: true,
-			// 		validateInput: (text) => {
-			// 			if ((['y', 'yes', 'n', 'no']).includes(text.toLowerCase())) {
-			// 				return `⚠️ Please enter either 'Yes' or 'No'.`;
-			// 			} else {
-			// 				return null;
-			// 			}
-			// 		}
-			// 	}).then((text) => {
-			// 		if (text && (['y', 'yes']).includes(text.toLowerCase())) {
-			// 			workspace.getConfiguration("doxide").update("openAI.rememberApiKey.enabled", true, true);
-			// 		} else {
-			// 			workspace.getConfiguration("doxide").update("openAI.rememberApiKey.enabled", false, true);
-			// 		}
-			// 	});
-			// }
+			console.log(`rememberApiKey: ${workspace.getConfiguration("doxide").get("openAI.openAI.apiKey.storeLocation")}`);
+			window.showInputBox({
+				title: `Would you like Doxide to store your API key in the User Settings or Workspace Settings? [Learn More](https://code.visualstudio.com/docs/getstarted/settings)`,
+				prompt: `User(U) / Workspace(W)`,
+				ignoreFocusOut: true,
+				password: true,
+				validateInput: (text) => {
+					if ((['user', 'workspace', 'u', 'w', 'user(u)', 'workspace(w)']).includes(text.toLowerCase())) {
+						return null;
+					} else {
+						return `⚠️ Please enter either 'U' for User or 'W' for Workspace`;
+					}
+				}
+			}).then((text) => {
+				if (text && (['user', 'u', 'user(u)']).includes(text.toLowerCase())) {
+					workspace.getConfiguration("doxide").update("openAI.openAI.apiKey.storeLocation", "User Settings", true);
+				} else {
+					workspace.getConfiguration("doxide").update("openAI.openAI.apiKey.storeLocation", "Workspace Settings", true);
+				}
+			});
 
 			// Remember API Key - store in User Configuration
-			// if (workspace.getConfiguration("doxide").get("openAI.rememberApiKey.enabled") === true) {
-
-			// STORE IN GLOBAL USER CONFIGURATION SETTINGS
+			if (workspace.getConfiguration("doxide").get("openAI.openAI.apiKey.storeLocation") === "User Settings") {
 				workspace
 					.getConfiguration("doxide")
 					.update("openAI.apiKey", newKey, true);
-			// } else { // Don't Remember - store in Workspace Configuration
-			// 	workspace
-			// 		.getConfiguration("doxide")
-			// 		.update("openAI.apiKey", newKey);
-			// }
+			} else { // Don't Remember - store in Workspace Configuration
+				workspace
+					.getConfiguration("doxide")
+					.update("openAI.apiKey", newKey);
+			}
+
+			authKey = workspace
+				.getConfiguration("doxide")
+				.get("openAI.apiKey");
 			
+			window.showInformationMessage(`✅ API Key Successfully added. You may need to reload the window for changes to take effect.`, 'Reload')
+				.then((res)=> {
+					if (res === 'Reload') {
+						commands.executeCommand("workbench.action.reloadWindow");
+					}
+				});
 		});
 	});
 	
 	/* ------------------------- Generate Docstring ------------------------- */
 	// Command that is run when "Generate Docstring" CodeLens is clicked
-	// TODO insertPoint (where to insert the docstring)
-	commands.registerCommand("doxide.generateDocstring", (text: string, insertionLine: number) => {
-		// console.log(`[genDocstring] text: ${text}`);
-        // console.log(`lens.range: ${JSON.stringify(insertPoint, null, 2)}`);
+	// TODO check if another docstring is already present
+	commands.registerCommand("doxide.generateDocstring", (text:string="", insertionLine:number=-1) => {
+		console.log(`[genDocstring] text: ${text}`);
 
 		// check authKey
 		if (!authKey || authKey === undefined) {
 			var isAuthKeyValid = showAuthKeyWarningMessage();
 		} else {
 			var isAuthKeyValid = true;
+		}
+
+		// Command not called using CodeLens
+		if ((!text || text === undefined) && insertionLine === -1) {
+			
 		}
 
 		// show progress window and use openAI to generate docstring

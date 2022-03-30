@@ -14,25 +14,30 @@ import { Position, Range, window, workspace } from "vscode";
  * @see https://beta.openai.com/docs/api-reference/completions/create
  */
 export async function openaiGenerateDocstring(text: string, authKey: string|undefined, insertionLine: number) {
-    console.log(`  insertionLine: ${JSON.stringify(insertionLine, null, 2)}`);
+    // console.log(`  insertionLine: ${JSON.stringify(insertionLine, null, 2)}`);
     // console.log(`  OPENAI_API_KEY: ${authKey}`);
-    console.log(`  text: ${JSON.stringify(text)}`);
+    // console.log(`  text: ${JSON.stringify(text)}`);
     if (!text || text === undefined) {
         window.showWarningMessage(`No function found. Please make sure that your cursor is either within a function or is selecting a function.`);
         return;
     }
-    const additionalPromptText: string = "\n# An elaborate, high quality docstring for the above function:\n\"\"\"";
+    
+    const additionalPostPromptText: string = "\n# An elaborate, high quality docstring for the above function:\n\"\"\"";
+    const additionalPrePromptText: string = "";
     const engine: string | undefined = workspace.getConfiguration("doxide").get("openAI.engine");
 
-    const formattingExamples: string = "";
+    const formattingExamples: string = "def bubble_sort(array):\\n    n = len(array)\\n    for i in range(n):\\n        already_sorted = True\\n        for j in range(n - i - 1):\\n            if array[j] > array[j + 1]:\\n                array[j], array[j + 1] = array[j + 1], array[j]\\n                already_sorted = False\\n        if already_sorted:\\n            break\\n    return array"+additionalPostPromptText+"'''\\n    Bubble sort implementation.\\n\\n    Parameters\\n    ----------\\n    array : list\\n        The array to be sorted.\\n\\n    Returns\\n    -------\\n    list\\n        The sorted array.\\n\\n    Examples\\n    --------\\n    >>> bubble_sort([3, 2, 1])\\n    [1, 2, 3]\\n    \\n    '''"+"\n\n";
 
+    // const prompt = formattingExamples + text + additionalPostPromptText;
+    const prompt = text + additionalPostPromptText;
+    console.log(`PROMPT: ${JSON.stringify(prompt, null, 2)}`)
     // NOTE: The token count of your prompt plus max_tokens cannot exceed the 
     //  model's context length. davinci-codex supports 4096 tokens
     await axios
         .post(
             `https://api.openai.com/v1/engines/${engine}/completions`,
             {
-                prompt: formattingExamples + text + additionalPromptText,
+                prompt: prompt,
                 // suffix: "",
                 max_tokens: Math.floor(text.length/2),
                 temperature: 0.3,
@@ -120,14 +125,14 @@ function addDocstringIndentationAndTokens(text:string, docstring: string, langId
     }
     // console.log(`re: ${re}`);
     // console.log(`match: ${JSON.stringify(match)}`);
-    console.log(`numIndents: ${numIndents}`);
+    // console.log(`numIndents: ${numIndents}`);
 
-    var re2 = new RegExp('\\n(?![\n\r])', 'g')
+    var re2 = new RegExp('\\n(?![\n\r])', 'g');
     const startDocstringToken = workspace.getConfiguration("doxide").get(`${langId}.startDocstringToken`) || "'''";
     const endDocstringToken = workspace.getConfiguration("doxide").get(`${langId}.endDocstringToken`) || "'''";
     // console.log(`startDocstringToken: ${startDocstringToken}`);
-    console.log(JSON.stringify(docstring.match(re2)));
-    console.log(JSON.stringify(docstring.replace(re2, `\n${indentString.repeat(numIndents)}`)));
+    // console.log(JSON.stringify(docstring.match(re2)));
+    // console.log(JSON.stringify(docstring.replace(re2, `\n${indentString.repeat(numIndents)}`)));
 
     // insert indents (either tabs or spaces) into each line of the docstring
     const docstringWithIndents = 

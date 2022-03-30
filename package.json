@@ -62,14 +62,29 @@
 				"order": 0,
 				"properties": {
 					"doxide.openAI.enabled": {
-					"type": "boolean",
-					"default": true,
-					"markdownDescription": "*Specifies whether to use OpenAI-Codex to generate docstrings and comments.* If disabled, OpenAI-Codex will not be used and the `Generate Docstring` command will generate a skeleton docstring."
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "*Specifies whether to use OpenAI-Codex to generate docstrings and comments.* If disabled, OpenAI-Codex will not be used and the `Generate Docstring` command will generate a skeleton docstring."
 					},
 					"doxide.openAI.apiKey": {
 						"type": "string",
 						"default": "",
 						"markdownDescription": "*Your OpenAI API key.* [Learn more.](Link)"
+					},
+					"openAI.openAI.apiKey.storeLocation": {
+						"type": "string",
+						"markdownDescription": "*Where you would like your API Key to be stored.* [Learn more](https://code.visualstudio.com/docs/getstarted/settings)",
+						"default": null,
+						"enum": [
+							"User Settings",
+							"Workspace Settings"
+						],
+						"enumDescriptions": [
+							"Settings that apply globally to any instance of VS Code you open.",
+							"Settings stored inside your workspace and only apply when the workspace is opened."
+						]
+						
+
 					}
 				}
 			},
@@ -81,7 +96,7 @@
 					"doxide.openAI.engine": {
 						"order": 0,
 						"type": "string",
-						"description": "The engine to be used to generate Docstrings and Comments. Note that Codex models (`code-...`) are in [private beta](https://openai.com/blog/openai-codex/) and GTP-3 models have variable (`text-...`) [Pricing](https://openai.com/api/pricing/).",
+						"markdownDescription": "The engine to be used to generate Docstrings and Comments. Note that Codex models (`code-...`) are in [private beta](https://openai.com/blog/openai-codex/) and GTP-3 models have variable (`text-...`) [Pricing](https://openai.com/api/pricing/).",
 						"default": "code-davinci-001",
 						"enum": [
 							"code-davinci-001",
@@ -172,6 +187,13 @@
 						"type": "string",
 						"default": "'''",
 						"markdownDescription": "Token to indicate the end of a docstring."
+					},
+					"doxide.python.docstringExample": {
+						"type": "object",
+						"default": {
+							"function": "def bubble_sort(array):\\n    n = len(array)\\n    for i in range(n):\\n        already_sorted = True\\n        for j in range(n - i - 1):\\n            if array[j] > array[j + 1]:\\n                array[j], array[j + 1] = array[j + 1], array[j]\\n                already_sorted = False\\n        if already_sorted:\\n            break\\n    return array",
+							"docstring": "'''\\n    Bubble sort implementation.\\n\\n    Parameters\\n    ----------\\n    array : list\\n        The array to be sorted.\\n\\n    Returns\\n    -------\\n    list\\n        The sorted array.\\n\\n    Examples\\n    --------\\n    >>> bubble_sort([3, 2, 1])\\n    [1, 2, 3]\\n    \\n    '''"
+						}
 					}
 				}
 			}
