@@ -1,3 +1,5 @@
 node_modules
 out
 .git
+examples/.vscode
+examples/.vscode/settings.json
