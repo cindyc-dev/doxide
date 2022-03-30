@@ -114,19 +114,20 @@ function addDocstringIndentationAndTokens(text:string, docstring: string, langId
             }
             if (insertSpaces && spacesCounter === tabSize) {
                 numIndents += 1;
+                spacesCounter = 0;
             }
         }
     }
     // console.log(`re: ${re}`);
     // console.log(`match: ${JSON.stringify(match)}`);
-    // console.log(`numIndents: ${numIndents}`);
+    console.log(`numIndents: ${numIndents}`);
 
-    var re2 = new RegExp('\\n(?=[^\\])', 'g');
+    var re2 = new RegExp('\\n(?![\n\r])', 'g')
     const startDocstringToken = workspace.getConfiguration("doxide").get(`${langId}.startDocstringToken`) || "'''";
     const endDocstringToken = workspace.getConfiguration("doxide").get(`${langId}.endDocstringToken`) || "'''";
     // console.log(`startDocstringToken: ${startDocstringToken}`);
-    // console.log(JSON.stringify(docstring.match(re2)));
-    // console.log(JSON.stringify(docstring.replace(re2, `\n${indentString.repeat(numIndents)}`)));
+    console.log(JSON.stringify(docstring.match(re2)));
+    console.log(JSON.stringify(docstring.replace(re2, `\n${indentString.repeat(numIndents)}`)));
 
     // insert indents (either tabs or spaces) into each line of the docstring
     const docstringWithIndents = 
