@@ -62,7 +62,7 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
     constructor() {
         // Reload the CodeLenses when the config has changed
         workspace.onDidChangeConfiguration((_) => {
-            console.log("Config was changed - reload codelens provider");
+            console.log("Config was changed - reloading codelens provider");
             this._onDidChangeCodeLensesEmitter.fire();
         });
     }
@@ -124,7 +124,7 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
 
         // Recursively call this function on all of the children
         for (const child of symbol.children) {
-            console.log(`    Symbol has children!`);
+            // console.log(`    Symbol has children!`);
             this.provideCodeLensHelper(lenses, document, child);
         }
     }
@@ -140,8 +140,7 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
         //  or if operation is cancelled
         if (
             workspace.getConfiguration("doxide").get("codeLens.enabled") ===
-                false ||
-            token.isCancellationRequested
+                false || token.isCancellationRequested
         ) {
             return null;
         }
@@ -167,13 +166,13 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
         if (!editor) {
             return lens; // No open text editor
         }
-        // console.log(`lens.contentRange: ${lens.contentRange}`);
+        
         var text = editor.document.getText(lens.contentRange);
         lens.command = {
             title: "Generate",
             tooltip: "Generate a Docstring for this function.",
             command: "doxide.generateDocstring",
-            arguments: [text], // TODO set text argument to be the function
+            arguments: [text, lens.range.start.line],
         };
         return lens;
     }

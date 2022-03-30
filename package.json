@@ -149,18 +149,30 @@
 						"type": "boolean",
 						"default": true,
 						"markdownDescription": "*Specifies whether to provide any Doxide Code Lens by default.* If enabled, Code Lenses (grey text) will be shown at the beginning of functions and methods with prompts for generating docstrings. Use the `Toggle Doxide Code Lens` command (`doxide.toggleCodeLens`) to toggle the Doxide code lens on and off for the current window."
+					},
+					"doxide.codeLens.generateTitle": {
+						"type": "string",
+						"default": "Generate Docstring ♾",
+						"markdownDescription": "*CodeLens Title*"
+
 					}
 				}
 			},
 			{
-				"id": "#TODOdocstring-templates",
-				"title": "Docstring Templates",
+				"id": "docstring-templates",
+				"title": "Docstring Configurations",
+				"order": 3,
 				"properties": {
-				"doxide.python.docstringTemplate": {
-					"type": "text",
-					"default": "#TODO",
-					"markdownDescription": "#TODO"
-				}
+					"doxide.python.startDocstringToken": {
+						"type": "string",
+						"default": "'''",
+						"markdownDescription": "Token to indicate the start of a docstring."
+					},
+					"doxide.python.endDocstringToken": {
+						"type": "string",
+						"default": "'''",
+						"markdownDescription": "Token to indicate the end of a docstring."
+					}
 				}
 			}
 		]

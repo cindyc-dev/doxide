@@ -2,15 +2,17 @@ import { commands, Disposable, window, languages, workspace, ProgressLocation, R
 import { DoxideCodeLensProvider } from "./CodeLensProvider";
 import { openaiGenerateDocstring } from "./openai";
 
+
 let disposables: Disposable[] = [];
 
 export function activate() {
 	console.log(`🤖 Doxide extension is activated!`);
 	
+	const langId = window.activeTextEditor?.document.languageId;
+
 	const authKey: string | undefined = workspace
 		.getConfiguration("doxide")
 		.get("openAI.apiKey");
-
 	console.log(`authKey: ${authKey}`);
 	// Check if OpenAI API Key is set
 	if (!authKey || authKey === undefined) {
@@ -100,11 +102,11 @@ export function activate() {
 	/* ------------------------- Generate Docstring ------------------------- */
 	// Command that is run when "Generate Docstring" CodeLens is clicked
 	// TODO insertPoint (where to insert the docstring)
-	commands.registerCommand("doxide.generateDocstring", (text: string, insertPoint?: Range) => {
-		console.log(`[genDocstring] text: ${text}`);
-        console.log(`lens.range: ${JSON.stringify(insertPoint, null, 2)}`);
+	commands.registerCommand("doxide.generateDocstring", (text: string, insertionLine: number) => {
+		// console.log(`[genDocstring] text: ${text}`);
+        // console.log(`lens.range: ${JSON.stringify(insertPoint, null, 2)}`);
 
-
+		// check authKey
 		if (!authKey || authKey === undefined) {
 			var isAuthKeyValid = showAuthKeyWarningMessage();
 		} else {
@@ -116,13 +118,13 @@ export function activate() {
 			window.withProgress(
 				{
 					location: ProgressLocation.Notification,
-					title: "Creating Docstring",
+					title: "Doxide",
 					cancellable: true
-				}, () => {
-					const p = new Promise<void>(() => {
-						openaiGenerateDocstring(text, authKey);
+				}, async (progress) => {
+					progress.report({
+						message: `Creating Docstring...`,
 					});
-					return p;
+					const res = await openaiGenerateDocstring(text, authKey, insertionLine);
 				}
 			);
 		}
