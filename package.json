@@ -1,7 +1,13 @@
 {
-  "name": "doxide",
-	"displayName": "doxide",
-	"description": "Automate code documentation using OpenAI-Codex",
+	"name": "doxide",
+	"displayName": "Doxide",
+	"description": "🤖 Automate code documentation using OpenAI-Codex",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/chuahxinyu/doxide"
+	},
+  	"license": "MIT",
+	"publisher": "Chuah Xin Yu",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.65.0"
@@ -10,14 +16,186 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:doxide.helloWorld"
+		"*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
 				"command": "doxide.helloWorld",
-				"title": "Hello World"
+				"title": "Hello World",
+				"category": "Doxide"
+			},
+			{
+				"command": "doxide.enableCodeLens",
+				"title": "Enable Code Lens",
+				"category": "Doxide"
+			},
+			{
+				"command": "doxide.disableCodeLens",
+				"title": "Disable Code Lens",
+				"category": "Doxide"
+			},
+			{
+				"command": "doxide.generateDocstring",
+				"title": "Generate Docstring",
+				"category": "Doxide"
+			},
+			{
+				"command": "doxide.setOpenAIapiKey",
+				"title": "Set OpenAI API Key",
+				"category": "Doxide"
+			}
+		],
+		"menus": {},
+		"keybindings": [
+			{
+				"command": "gitlens.key.left",
+				"key": "left",
+				"when": "gitlens:key:left"
+			}
+		],
+		"configuration": [
+			{
+				"id": "openai-api-key",
+				"title": "OpenAI API Key",
+				"order": 0,
+				"properties": {
+					"doxide.openAI.enabled": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "*Specifies whether to use OpenAI-Codex to generate docstrings and comments.* If disabled, OpenAI-Codex will not be used and the `Generate Docstring` command will generate a skeleton docstring."
+					},
+					"doxide.openAI.apiKey": {
+						"type": "string",
+						"default": "",
+						"markdownDescription": "*Your OpenAI API key.* [Learn more.](Link)"
+					},
+					"openAI.openAI.apiKey.storeLocation": {
+						"type": "string",
+						"markdownDescription": "*Where you would like your API Key to be stored.* [Learn more](https://code.visualstudio.com/docs/getstarted/settings)",
+						"default": null,
+						"enum": [
+							"User Settings",
+							"Workspace Settings"
+						],
+						"enumDescriptions": [
+							"Settings that apply globally to any instance of VS Code you open.",
+							"Settings stored inside your workspace and only apply when the workspace is opened."
+						]
+						
+
+					}
+				}
+			},
+			{
+				"id": "openai-config",
+				"title": "OpenAI Configuration",
+				"order": 1,
+				"properties": {
+					"doxide.openAI.engine": {
+						"order": 0,
+						"type": "string",
+						"markdownDescription": "The engine to be used to generate Docstrings and Comments. Note that Codex models (`code-...`) are in [private beta](https://openai.com/blog/openai-codex/) and GTP-3 models have variable (`text-...`) [Pricing](https://openai.com/api/pricing/).",
+						"default": "code-davinci-001",
+						"enum": [
+							"code-davinci-001",
+							"code-davinci-002",
+							"code-cushman-001",
+							"text-davinci-002",
+							"text-davinci-001",
+							"text-curie-001",
+							"text-babbage-001",
+							"text-ada-001"
+						],
+						"enumDescriptions": [
+							"(Codex Davinci V1) Most capable Codex model. Particularly good at translating natural language to code.",
+							"(Codex Davinci V2) Most capable Codex model. Particularly good at translating natural language to code.",
+							"(Codex Cushman V1) Almost as capable as Davinci Codex, but slightly faster.",
+							"(GPT-3 Davinci V2) Most capable GPT-3 model. Can do any task the other models can do, often with less context.",
+							"(GPT-3 Davinci V1) Most capable GPT-3 model. Can do any task the other models can do, often with less context.",
+							"(GPT-3 Curie V1) Very capable, but faster and lower cost than Davinci.",
+							"(GPT-3 Babbage V1) Capable of straightforward tasks, very fast, and lower cost.",
+							"(GPT-3 Ada V1) Capable of very simple tasks, usually the fastest model in the GPT-3 series, and lowest cost."
+						]
+						
+					},
+					"doxide.openAI.config.n": {
+						"order": 1,
+						"type": "integer",
+						"default": 5,
+						"markdownDescription": "How many completions to generate for each prompt."
+					},
+					"doxide.openAI.config.temperature": {
+						"order": 2,
+						"type": "number",
+						"default": 0.1,
+						"markdownDescription": "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.",
+						"examples": [],
+						"minimum": 0,
+						"maximum": 1
+					},
+					"doxide.openAI.config.presencePenalty": {
+						"order": 3,
+						"type": "number",
+						"default": 0.1,
+						"markdownDescription": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.",
+						"examples": [],
+						"minimum": -2,
+						"maximum": 2
+					},
+					"doxide.openAI.config.frequencyPenalty": {
+						"order": 4,
+						"type": "number",
+						"default": 0.1,
+						"markdownDescription": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.",
+						"examples": [],
+						"minimum": -2,
+						"maximum": 2
+					}
+				}
+			},
+			{
+				"id": "code-lens",
+				"title": "Code Lens",
+				"order": 2,
+				"properties": {
+					"doxide.codeLens.enabled": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "*Specifies whether to provide any Doxide Code Lens by default.* If enabled, Code Lenses (grey text) will be shown at the beginning of functions and methods with prompts for generating docstrings. Use the `Toggle Doxide Code Lens` command (`doxide.toggleCodeLens`) to toggle the Doxide code lens on and off for the current window."
+					},
+					"doxide.codeLens.generateTitle": {
+						"type": "string",
+						"default": "Generate Docstring ♾",
+						"markdownDescription": "*CodeLens Title*"
+
+					}
+				}
+			},
+			{
+				"id": "docstring-templates",
+				"title": "Docstring Configurations",
+				"order": 3,
+				"properties": {
+					"doxide.python.startDocstringToken": {
+						"type": "string",
+						"default": "'''",
+						"markdownDescription": "Token to indicate the start of a docstring."
+					},
+					"doxide.python.endDocstringToken": {
+						"type": "string",
+						"default": "'''",
+						"markdownDescription": "Token to indicate the end of a docstring."
+					},
+					"doxide.python.docstringExample": {
+						"type": "object",
+						"default": {
+							"function": "def bubble_sort(array):\\n    n = len(array)\\n    for i in range(n):\\n        already_sorted = True\\n        for j in range(n - i - 1):\\n            if array[j] > array[j + 1]:\\n                array[j], array[j + 1] = array[j + 1], array[j]\\n                already_sorted = False\\n        if already_sorted:\\n            break\\n    return array",
+							"docstring": "'''\\n    Bubble sort implementation.\\n\\n    Parameters\\n    ----------\\n    array : list\\n        The array to be sorted.\\n\\n    Returns\\n    -------\\n    list\\n        The sorted array.\\n\\n    Examples\\n    --------\\n    >>> bubble_sort([3, 2, 1])\\n    [1, 2, 3]\\n    \\n    '''"
+						}
+					}
+				}
 			}
 		]
 	},
@@ -30,16 +208,19 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.65.0",
 		"@types/glob": "^7.1.4",
 		"@types/mocha": "^9.0.0",
 		"@types/node": "14.x",
+		"@types/vscode": "^1.65.0",
 		"@typescript-eslint/eslint-plugin": "^5.1.0",
 		"@typescript-eslint/parser": "^5.1.0",
+		"@vscode/test-electron": "^1.6.2",
 		"eslint": "^8.1.0",
 		"glob": "^7.1.7",
 		"mocha": "^9.1.3",
-		"typescript": "^4.4.4",
-		"@vscode/test-electron": "^1.6.2"
+		"typescript": "^4.4.4"
+	},
+	"dependencies": {
+		"axios": "^0.26.1"
 	}
 }
