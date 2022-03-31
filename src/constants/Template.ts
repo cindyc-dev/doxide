@@ -100,11 +100,10 @@ Examples:
 * @example
 * // returns [1, 2, 3]
 * bubble_sort([3, 2, 1])
-`,
-``
+`
 ];
 
-export const docstringTemplates = [
+export const template = [
     {
         lang: "python",
         exampleCode: pythonExampleBubbleSort,

@@ -1,17 +1,4 @@
-/**
-Insertion sort implementation.
 
-Parameters:
-    array(list): The array to be sorted.
-
-Returns:
-    list: The sorted array.
-
-Examples: 
-    >>> insertion_sort([3, 2, 1])
-    [1, 2, 3]
-
-*/
 function insertionSort(inputArr) {
 	let n = inputArr.length;
 	for (let i = 1; i < n; i++) {
@@ -27,14 +14,7 @@ function insertionSort(inputArr) {
 	}
 	return inputArr;
 }
-/**
-Prints "Hello, World!" to the console.
 
-Parameters:
-    None
-
-Returns:
-*/
 function helloWorld() {
     console.log("Hello, World!");
 }

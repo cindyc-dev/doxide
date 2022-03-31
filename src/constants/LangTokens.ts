@@ -1,5 +1,0 @@
-const languageTokens = [
-    {
-        lang: "python"
-    }
-]

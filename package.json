@@ -45,9 +45,22 @@
 				"command": "doxide.setOpenAIapiKey",
 				"title": "Set OpenAI API Key",
 				"category": "Doxide"
+			},
+			{
+				"command": "doxide.generateFileHeader",
+				"title": "Set OpenAI API Key",
+				"category": "Doxide"
 			}
 		],
-		"menus": {},
+		"menus": {
+			"editor/context": [
+				{
+					"when": "editorHasSelection && editorLangId =~ /^typescript$|^python$|^php$|^java$|^javascript$/",
+					"command": "doxide.generateDocstring",
+					"group": "navigation"
+				}
+			]
+		},
 		"keybindings": [
 			{
 				"command": "gitlens.key.left",
@@ -220,7 +233,8 @@
 						"markdownDescription": "Template for JavaScript Docstring.",
 						"enum": [
 							0,
-							1
+							1,
+							3
 						],
 						"enumDescriptions": [
 							"Parameters\n    ----------\n    array : list\n        The array to be sorted.\n\n    Returns\n    -------\n    list\n        The sorted array.\n\n    Examples\n    --------\n    >>> bubble_sort([3, 2, 1])\n    [1, 2, 3]",
@@ -228,6 +242,34 @@
 							"    * @param {Array} inputArr - An array of numbers\n    * @returns {Array} - The sorted array\n    * @description - This function sorts an array of numbers using the insertion sort algorithm\n    * @example\n    * // returns [1, 2, 3]\n    * bubble_sort([3, 2, 1])"
 						],
 						"order": 5
+					},
+					"doxide.typescript.startDocstringToken": {
+						"type": "string",
+						"default": "/**",
+						"markdownDescription": "Token to indicate the start of a TypeScript docstring.",
+						"order": 6
+					},
+					"doxide.typescript.endDocstringToken": {
+						"type": "string",
+						"default": "*/",
+						"markdownDescription": "Token to indicate the end of a TypeScript docstring.",
+						"order": 7
+					},
+					"doxide.typescript.docstringTemplate": {
+						"type": "integer",
+						"default": 0,
+						"markdownDescription": "Template for TypeScript Docstring.",
+						"enum": [
+							0,
+							1,
+							3
+						],
+						"enumDescriptions": [
+							"Parameters\n    ----------\n    array : list\n        The array to be sorted.\n\n    Returns\n    -------\n    list\n        The sorted array.\n\n    Examples\n    --------\n    >>> bubble_sort([3, 2, 1])\n    [1, 2, 3]",
+							"Parameters:\n        array(list): The array to be sorted.\n\n    Returns:\n        list: The sorted array.\n\n    Examples: \n        >>> bubble_sort([3, 2, 1])\n        [1, 2, 3]",
+							"    * @param {Array} inputArr - An array of numbers\n    * @returns {Array} - The sorted array\n    * @description - This function sorts an array of numbers using the insertion sort algorithm\n    * @example\n    * // returns [1, 2, 3]\n    * bubble_sort([3, 2, 1])"
+						],
+						"order": 8
 					}
 				}
 			}

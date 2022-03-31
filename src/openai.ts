@@ -6,7 +6,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 import axios from "axios";
 import { Position, Range, window, workspace } from "vscode";
-import { docstringTemplates } from "./constants/DocstringTemplates";
+import { template } from "./constants/Template";
 
 /**
  * Makes a post request to OpenAI-Codex API. Returns an array of the responses 
@@ -33,7 +33,7 @@ export async function openaiGenerateDocstring(text: string, authKey: string|unde
     const additionalPrePromptText: string = "";
     const engine: string | undefined = workspace.getConfiguration("doxide").get("openAI.engine");
 
-    const docstringTemplateObj = docstringTemplates.find(x => x.lang === langId);
+    const docstringTemplateObj = template.find(x => x.lang === langId);
     const exampleBubbleSort = docstringTemplateObj?.exampleCode || '';
     const templates = docstringTemplateObj?.exampleTemplates || [];
     // const formattingExamples: string = "def bubble_sort(array):\n    n = len(array)\n    for i in range(n):\n        already_sorted = True\n        for j in range(n - i - 1):\n            if array[j] > array[j + 1]:\n                array[j], array[j + 1] = array[j + 1], array[j]\n                already_sorted = False\n        if already_sorted:\n            break\n    return array"+additionalPostPromptText+"\n    Bubble sort implementation.\n\n    Parameters\n    ----------\n    array : list\n        The array to be sorted.\n\n    Returns\n    -------\n    list\n        The sorted array.\n\n    Examples\n    --------\n    >>> bubble_sort([3, 2, 1])\n    [1, 2, 3]\n    \"\"\""+"\n\n";
@@ -78,20 +78,19 @@ export async function openaiGenerateDocstring(text: string, authKey: string|unde
                 )}`
             );
             
-            
             let docstring = response.data.choices[0].text;
             
             editor?.edit(editBuilder => {
                 // make sure docstring is added after function signature
                 if (langId === 'python') {
                     insertionLine += 1;
-                } else {
-                    insertionLine -= 1;
                 }
                 docstring = addDocstringIndentationAndTokens(text, docstring, langId);
                 const insertionPoint = new Position(insertionLine, 0);
                 editBuilder.insert(insertionPoint, docstring);
             });
+
+            window.showInformationMessage(`✅ Generated Docstring!`);
         })
         .catch((error: any) => {
             console.error(`[openaiGenerateDocstring] error: ${error}`);
@@ -115,7 +114,7 @@ function addDocstringIndentationAndTokens(text:string, docstring: string, langId
 
     if (langId === "python") {
         // [1] COUNT NUMBER OF INDENTS NEEDED
-        const numIndents = countNumIndents(insertSpaces, tabSize, text);
+        numIndents = countNumIndents(insertSpaces, tabSize, text);
 
         // [2] CHECKING IF DOCSTRING ALREADY INCLUDES INDENTATION
         const numIndentsInDocstring = countNumIndents(insertSpaces, tabSize, docstring);
@@ -131,6 +130,8 @@ function addDocstringIndentationAndTokens(text:string, docstring: string, langId
             
         }
     }
+
+    console.log(`numIndents: ${numIndents}`);
     
 
     // [4] CONSTRUCTING THE FINAL DOCSTRING
@@ -139,10 +140,11 @@ function addDocstringIndentationAndTokens(text:string, docstring: string, langId
     // console.log(`startDocstringToken: ${startDocstringToken}`);
 
     // insert indents (either tabs or spaces) into each line of the docstring
-
-    return indentString.repeat(numIndents) + startDocstringToken 
-        + docstring
-        + '\n' + indentString.repeat(numIndents) + endDocstringToken;
+    const newDocstring = indentString.repeat(numIndents) + startDocstringToken 
+    + docstring
+    + '\n' + indentString.repeat(numIndents) + endDocstringToken + '\n';
+    console.log(newDocstring);
+    return newDocstring;
 }
 
 /**

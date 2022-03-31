@@ -1,23 +1,19 @@
+import pandas as pd
+
+def helloworld():
+    print("Hello, world!")
+
+
+def randomly_split_dataset(folder, filename, split_ratio=[0.8, 0.2]):
+    df = pd.read_json(folder + filename, lines=True)
+    train_name, test_name = "train.jsonl", "test.jsonl"
+    df_train, df_test = train_test_split(df, test_size=split_ratio[1], random_state=42)
+    df_train.to_json(folder + train_name, orient='records', lines=True)
+    df_test.to_json(folder + test_name, orient='records', lines=True)
+    randomly_split_dataset('finetune_data/', 'dataset.jsonl')
+
+
 def bubble_sort(array):
-    '''
-        Bubble sort implementation.
-
-        Parameters
-        ----------
-        array : list
-            The array to be sorted.
-
-        Returns
-        -------
-        list
-            The sorted array.
-
-        Examples
-        --------
-        >>> bubble_sort([3, 2, 1])
-        [1, 2, 3]
-        
-    '''
     n = len(array)
     for i in range(n):
         already_sorted = True
@@ -31,25 +27,6 @@ def bubble_sort(array):
 
 
 def insertion_sort(array):
-    '''
-        Insertion sort implementation.
-
-        Parameters
-        ----------
-        array : list
-            The array to be sorted.
-
-        Returns
-        -------
-        list
-            The sorted array.
-
-        Examples
-        --------
-        >>> insertion_sort([3, 2, 1])
-        [1, 2, 3]
-        
-    '''
     for i in range(1, len(array)):
         key_item = array[i]
         j = i - 1
@@ -62,27 +39,6 @@ def insertion_sort(array):
 
 
 def merge(left, right):
-    '''
-        Merge sort implementation.
-
-        Parameters
-        ----------
-        left : list
-            The left part of the array to be sorted.
-        right : list
-            The right part of the array to be sorted.
-
-        Returns
-        -------
-        list
-            The sorted array.
-
-        Examples
-        --------
-        >>> merge([1, 2, 3], [4, 5, 6])
-        [1, 2, 3, 4, 5, 6]
-        
-    '''
     if len(left) == 0:
         return right
     if len(right) == 0:

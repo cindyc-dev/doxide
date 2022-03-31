@@ -1,7 +1,6 @@
-import { commands, Disposable, window, languages, workspace, ProgressLocation, Range } from "vscode";
+import { commands, Disposable, window, languages, workspace, ProgressLocation, Range, Position } from "vscode";
 import { DoxideCodeLensProvider } from "./CodeLensProvider";
 import { openaiGenerateDocstring } from "./openai";
-
 
 let disposables: Disposable[] = [];
 /**
@@ -126,7 +125,13 @@ export function activate() {
 		}
 
 		// Command not called using CodeLens
-		if ((!text || text === undefined) && insertionLine === -1) {
+		if (!text || text === undefined || insertionLine === -1) {
+			console.log("YES");
+			const editor = window.activeTextEditor;
+			if (!editor) { return; }
+			text = editor.document.getText(editor.selection);
+			insertionLine = editor.selection.start.line;
+			console.log(`text: ${text}, insertionLine: ${insertionLine}`);
 			
 		}
 
