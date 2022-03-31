@@ -85,7 +85,7 @@
 					"doxide.openAI.apiKey": {
 						"type": "string",
 						"default": "",
-						"markdownDescription": "*Your OpenAI API key.* [Learn more.](Link)",
+						"markdownDescription": "*Your OpenAI API key.* [Learn more.](https://github.com/chuahxinyu/doxide#-getting-started)",
 						"order": 0
 					},
 					"doxide.openAI.apiKey.storeLocation": {
