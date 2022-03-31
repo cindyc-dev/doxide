@@ -83,8 +83,6 @@
 							"Settings that apply globally to any instance of VS Code you open.",
 							"Settings stored inside your workspace and only apply when the workspace is opened."
 						]
-						
-
 					}
 				}
 			},
@@ -181,19 +179,55 @@
 					"doxide.python.startDocstringToken": {
 						"type": "string",
 						"default": "'''",
-						"markdownDescription": "Token to indicate the start of a docstring."
+						"markdownDescription": "Token to indicate the start of a Python docstring.",
+						"order": 0
 					},
 					"doxide.python.endDocstringToken": {
 						"type": "string",
 						"default": "'''",
-						"markdownDescription": "Token to indicate the end of a docstring."
+						"markdownDescription": "Token to indicate the end of a Python docstring.",
+						"order": 1
 					},
-					"doxide.python.docstringExample": {
-						"type": "object",
-						"default": {
-							"function": "def bubble_sort(array):\\n    n = len(array)\\n    for i in range(n):\\n        already_sorted = True\\n        for j in range(n - i - 1):\\n            if array[j] > array[j + 1]:\\n                array[j], array[j + 1] = array[j + 1], array[j]\\n                already_sorted = False\\n        if already_sorted:\\n            break\\n    return array",
-							"docstring": "'''\\n    Bubble sort implementation.\\n\\n    Parameters\\n    ----------\\n    array : list\\n        The array to be sorted.\\n\\n    Returns\\n    -------\\n    list\\n        The sorted array.\\n\\n    Examples\\n    --------\\n    >>> bubble_sort([3, 2, 1])\\n    [1, 2, 3]\\n    \\n    '''"
-						}
+					"doxide.python.docstringTemplate": {
+						"type": "integer",
+						"default": 0,
+						"markdownDescription": "Template for Python Docstring.",
+						"enum": [
+							0,
+							1
+						],
+						"enumDescriptions": [
+							"Parameters\n    ----------\n    array : list\n        The array to be sorted.\n\n    Returns\n    -------\n    list\n        The sorted array.\n\n    Examples\n    --------\n    >>> bubble_sort([3, 2, 1])\n    [1, 2, 3]",
+							"Parameters:\n        array(list): The array to be sorted.\n\n    Returns:\n        list: The sorted array.\n\n    Examples: \n        >>> bubble_sort([3, 2, 1])\n        [1, 2, 3]"
+						],
+						"order": 2
+					},
+					"doxide.javascript.startDocstringToken": {
+						"type": "string",
+						"default": "/**",
+						"markdownDescription": "Token to indicate the start of a JavaScript docstring.",
+						"order": 3
+					},
+					"doxide.javascript.endDocstringToken": {
+						"type": "string",
+						"default": "*/",
+						"markdownDescription": "Token to indicate the end of a JavaScript docstring.",
+						"order": 4
+					},
+					"doxide.javascript.docstringTemplate": {
+						"type": "integer",
+						"default": 0,
+						"markdownDescription": "Template for JavaScript Docstring.",
+						"enum": [
+							0,
+							1
+						],
+						"enumDescriptions": [
+							"Parameters\n    ----------\n    array : list\n        The array to be sorted.\n\n    Returns\n    -------\n    list\n        The sorted array.\n\n    Examples\n    --------\n    >>> bubble_sort([3, 2, 1])\n    [1, 2, 3]",
+							"Parameters:\n        array(list): The array to be sorted.\n\n    Returns:\n        list: The sorted array.\n\n    Examples: \n        >>> bubble_sort([3, 2, 1])\n        [1, 2, 3]",
+							"    * @param {Array} inputArr - An array of numbers\n    * @returns {Array} - The sorted array\n    * @description - This function sorts an array of numbers using the insertion sort algorithm\n    * @example\n    * // returns [1, 2, 3]\n    * bubble_sort([3, 2, 1])"
+						],
+						"order": 5
 					}
 				}
 			}

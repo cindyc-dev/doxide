@@ -6,6 +6,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 import axios from "axios";
 import { Position, Range, window, workspace } from "vscode";
+import { docstringTemplates } from "./constants/DocstringTemplates";
 
 /**
  * Makes a post request to OpenAI-Codex API. Returns an array of the responses 
@@ -25,11 +26,18 @@ export async function openaiGenerateDocstring(text: string, authKey: string|unde
     const editor = window.activeTextEditor;
     const langId = editor?.document.languageId || 'python';
     const startDocstringToken = workspace.getConfiguration("doxide").get(`${langId}.startDocstringToken`) || "'''";
-    const additionalPostPromptText: string = "\n# An elaborate, high quality docstring for the above function:\n    "+startDocstringToken;
+    const endDocstringToken = workspace.getConfiguration("doxide").get(`${langId}.endDocstringToken`) || "'''";
+    const templateNum: number = workspace.getConfiguration("doxide").get(`${langId}.docstringTemplate`) || 0;
+
+    const additionalPostPromptText: string = `${langId === 'python'?"\n    ": ""}` + "# An elaborate, high quality docstring for the above function:" + `${langId === 'python'?"\n    ": ""}` + startDocstringToken;
     const additionalPrePromptText: string = "";
     const engine: string | undefined = workspace.getConfiguration("doxide").get("openAI.engine");
 
-    const formattingExamples: string = "def bubble_sort(array):\n    n = len(array)\n    for i in range(n):\n        already_sorted = True\n        for j in range(n - i - 1):\n            if array[j] > array[j + 1]:\n                array[j], array[j + 1] = array[j + 1], array[j]\n                already_sorted = False\n        if already_sorted:\n            break\n    return array"+additionalPostPromptText+"\n    Bubble sort implementation.\n\n    Parameters\n    ----------\n    array : list\n        The array to be sorted.\n\n    Returns\n    -------\n    list\n        The sorted array.\n\n    Examples\n    --------\n    >>> bubble_sort([3, 2, 1])\n    [1, 2, 3]\n    \"\"\""+"\n\n";
+    const docstringTemplateObj = docstringTemplates.find(x => x.lang === langId);
+    const exampleBubbleSort = docstringTemplateObj?.exampleCode || '';
+    const templates = docstringTemplateObj?.exampleTemplates || [];
+    // const formattingExamples: string = "def bubble_sort(array):\n    n = len(array)\n    for i in range(n):\n        already_sorted = True\n        for j in range(n - i - 1):\n            if array[j] > array[j + 1]:\n                array[j], array[j + 1] = array[j + 1], array[j]\n                already_sorted = False\n        if already_sorted:\n            break\n    return array"+additionalPostPromptText+"\n    Bubble sort implementation.\n\n    Parameters\n    ----------\n    array : list\n        The array to be sorted.\n\n    Returns\n    -------\n    list\n        The sorted array.\n\n    Examples\n    --------\n    >>> bubble_sort([3, 2, 1])\n    [1, 2, 3]\n    \"\"\""+"\n\n";
+    const formattingExamples: string = exampleBubbleSort + additionalPostPromptText + templates[templateNum] + endDocstringToken + "\n\n";
 
     const prompt = formattingExamples + text + additionalPostPromptText;
     // const prompt = text + additionalPostPromptText;
@@ -45,10 +53,10 @@ export async function openaiGenerateDocstring(text: string, authKey: string|unde
                 max_tokens: Math.floor(text.length/2),
                 temperature: 0.3,
                 top_p: 1,
-                n: workspace.getConfiguration("doxide").get("openAI.config.n"),
+                n: workspace.getConfiguration("doxide").get("openAI.config.n") || 5,
                 stream: false,
                 logprobs: null,
-                stop: ["#", "\"\"\"", "'''"],
+                stop: docstringTemplateObj?.stopTokens || ["#", "\"\"\"", "'''", "//", "/**", "*/"],
                 // presence_penalty: 0,
                 // frequency_penalty: 0,
                 // best_of: ,
@@ -77,6 +85,8 @@ export async function openaiGenerateDocstring(text: string, authKey: string|unde
                 // make sure docstring is added after function signature
                 if (langId === 'python') {
                     insertionLine += 1;
+                } else {
+                    insertionLine -= 1;
                 }
                 docstring = addDocstringIndentationAndTokens(text, docstring, langId);
                 const insertionPoint = new Position(insertionLine, 0);
@@ -101,20 +111,27 @@ function addDocstringIndentationAndTokens(text:string, docstring: string, langId
     const tabSize = editor?.options.tabSize as number;
     const insertSpaces = editor?.options.insertSpaces as boolean;
     const indentString = insertSpaces ? ' '.repeat(tabSize) : '\t';
+    let numIndents = 0;
 
-    // [1] COUNT NUMBER OF INDENTS NEEDED
-    const numIndents = countNumIndents(insertSpaces, tabSize, text);
+    if (langId === "python") {
+        // [1] COUNT NUMBER OF INDENTS NEEDED
+        const numIndents = countNumIndents(insertSpaces, tabSize, text);
 
-    // [2] CHECKING IF DOCSTRING ALREADY INCLUDES INDENTATION
-    const numIndentsInDocstring = countNumIndents(insertSpaces, tabSize, docstring);
-    console.log(numIndentsInDocstring);
+        // [2] CHECKING IF DOCSTRING ALREADY INCLUDES INDENTATION
+        const numIndentsInDocstring = countNumIndents(insertSpaces, tabSize, docstring);
+        console.log(numIndentsInDocstring);
 
-    if (!(numIndentsInDocstring === numIndents)) {
-        const numIndentsToAdd = numIndents - numIndentsInDocstring;
-        // docstring does not include (enough) indentation, add it
-        var re2 = new RegExp('\\n(?![\n\r])', 'g');
-        docstring = docstring.replace(re2, `\n${indentString.repeat(numIndentsToAdd)}`);
+        if (!(numIndentsInDocstring === numIndents)) {
+            const numIndentsDiff = numIndents - numIndentsInDocstring;
+            if (numIndentsDiff > 0) {
+                // docstring does not include (enough) indentation, add it
+                var re2 = new RegExp('\\n(?![\n\r])', 'g');
+                docstring = docstring.replace(re2, `\n${indentString.repeat(numIndentsDiff)}`);
+            }
+            
+        }
     }
+    
 
     // [4] CONSTRUCTING THE FINAL DOCSTRING
     const startDocstringToken = workspace.getConfiguration("doxide").get(`${langId}.startDocstringToken`) || "'''";
@@ -125,17 +142,18 @@ function addDocstringIndentationAndTokens(text:string, docstring: string, langId
 
     return indentString.repeat(numIndents) + startDocstringToken 
         + docstring
-        + '\n' + indentString.repeat(numIndents) + endDocstringToken + '\n';
+        + '\n' + indentString.repeat(numIndents) + endDocstringToken;
 }
 
 /**
  * @returns the number of indents/tabs are needed for the docstring
  */
-function countNumIndents (insertSpaces:boolean, tabSize: number, text:string): number {
+function countNumIndents(insertSpaces:boolean, tabSize:number, text:string): number {
     // find for the first line of code after function signature
     var pattern = insertSpaces ? `\\n\\s{${tabSize},}` : `\\n\\t+`;
     var re = new RegExp(pattern);
     var match = text.match(re) || [];
+    console.log(`match: ${match}`);
 
     // count the number of indets in that first line
     let numIndents = 0;

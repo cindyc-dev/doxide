@@ -4,7 +4,9 @@ import { openaiGenerateDocstring } from "./openai";
 
 
 let disposables: Disposable[] = [];
-
+/**
+ * @example
+ */
 export function activate() {
 	console.log(`🤖 Doxide extension is activated!`);
 	
@@ -14,6 +16,7 @@ export function activate() {
 		.getConfiguration("doxide")
 		.get("openAI.apiKey");
 	console.log(`authKey: ${authKey}`);
+
 	// Check if OpenAI API Key is set
 	if (!authKey || authKey === undefined) {
 		showAuthKeyWarningMessage();
@@ -31,6 +34,7 @@ export function activate() {
 	// Create and register CodeLensProvider (only for Python, for now)
 	const codeLensProvider = new DoxideCodeLensProvider();
 	languages.registerCodeLensProvider("python", codeLensProvider);
+	languages.registerCodeLensProvider("javascript", codeLensProvider);
 
 	// Command to enable CodeLenses
 	commands.registerCommand("doxide.enableCodeLens", () => {
@@ -45,7 +49,6 @@ export function activate() {
 		workspace.getConfiguration("doxide").update("codeLens.enabled", false);
 		window.showInformationMessage(`Doxide: CodeLens Disabled.`);
 	});
-
 	
 	// Command that promps user to Enter their OpenAI API Key
 	commands.registerCommand("doxide.setOpenAIapiKey", () => {
