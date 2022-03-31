@@ -21,3 +21,9 @@
 
 
 ## ⛳️ What's Next?
+
+"doxide.openAI.enabled": {
+						"type": "boolean",
+						"default": true,
+						"markdownDescription": "*Specifies whether to use OpenAI-Codex to generate docstrings and comments.* If disabled, OpenAI-Codex will not be used and the `Generate Docstring` command will generate a skeleton docstring."
+					},

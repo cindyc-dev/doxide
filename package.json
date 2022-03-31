@@ -1,20 +1,28 @@
 {
 	"name": "doxide",
 	"displayName": "Doxide",
-	"description": "🤖 Automate code documentation using OpenAI-Codex",
+	"description": "🤖 Automate code documentation using OpenAI",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/chuahxinyu/doxide"
 	},
   	"license": "MIT",
-	"publisher": "Chuah Xin Yu",
-	"version": "0.0.1",
+	"publisher": "XinYu",
+	"version": "0.1.0",
+	"icon": "assets/Logo.png",
 	"engines": {
 		"vscode": "^1.65.0"
 	},
 	"categories": [
+		"Programming Languages",
+		"Snippets",
+		"Education",
 		"Other"
 	],
+	"galleryBanner": {
+		"color": "#003559",
+		"theme": "dark"
+	},
 	"activationEvents": [
 		"*"
 	],
@@ -74,17 +82,13 @@
 				"title": "OpenAI API Key",
 				"order": 0,
 				"properties": {
-					"doxide.openAI.enabled": {
-						"type": "boolean",
-						"default": true,
-						"markdownDescription": "*Specifies whether to use OpenAI-Codex to generate docstrings and comments.* If disabled, OpenAI-Codex will not be used and the `Generate Docstring` command will generate a skeleton docstring."
-					},
 					"doxide.openAI.apiKey": {
 						"type": "string",
 						"default": "",
-						"markdownDescription": "*Your OpenAI API key.* [Learn more.](Link)"
+						"markdownDescription": "*Your OpenAI API key.* [Learn more.](Link)",
+						"order": 0
 					},
-					"openAI.openAI.apiKey.storeLocation": {
+					"doxide.openAI.apiKey.storeLocation": {
 						"type": "string",
 						"markdownDescription": "*Where you would like your API Key to be stored.* [Learn more](https://code.visualstudio.com/docs/getstarted/settings)",
 						"default": null,
@@ -95,7 +99,8 @@
 						"enumDescriptions": [
 							"Settings that apply globally to any instance of VS Code you open.",
 							"Settings stored inside your workspace and only apply when the workspace is opened."
-						]
+						],
+						"order": 1
 					}
 				}
 			},
@@ -134,7 +139,7 @@
 					"doxide.openAI.config.n": {
 						"order": 1,
 						"type": "integer",
-						"default": 5,
+						"default": 1,
 						"markdownDescription": "How many completions to generate for each prompt."
 					},
 					"doxide.openAI.config.temperature": {
@@ -174,12 +179,14 @@
 					"doxide.codeLens.enabled": {
 						"type": "boolean",
 						"default": true,
-						"markdownDescription": "*Specifies whether to provide any Doxide Code Lens by default.* If enabled, Code Lenses (grey text) will be shown at the beginning of functions and methods with prompts for generating docstrings. Use the `Toggle Doxide Code Lens` command (`doxide.toggleCodeLens`) to toggle the Doxide code lens on and off for the current window."
+						"markdownDescription": "*Specifies whether to provide any Doxide Code Lens by default.* If enabled, Code Lenses (grey text) will be shown at the beginning of functions and methods with prompts for generating docstrings. Use the `Toggle Doxide Code Lens` command (`doxide.toggleCodeLens`) to toggle the Doxide code lens on and off for the current window.",
+						"order": 0
 					},
 					"doxide.codeLens.generateTitle": {
 						"type": "string",
-						"default": "Generate Docstring ♾",
-						"markdownDescription": "*CodeLens Title*"
+						"default": "Generate",
+						"markdownDescription": "*CodeLens Title/Label*. The text to be shown above function signatures that enable you to generate docstrings.",
+						"order": 1
 
 					}
 				}

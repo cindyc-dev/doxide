@@ -54,7 +54,7 @@ export function activate() {
 		window.showInputBox({
 			title: `Enter your OpenAI API Key:`,
 			prompt: `Enter your OpenAI API Key`,
-			// password: true,
+			password: true,
 			ignoreFocusOut: true,
 			validateInput: (text) => {
 				if (!text) {
@@ -71,7 +71,7 @@ export function activate() {
 				title: `Would you like Doxide to store your API key in the User Settings or Workspace Settings? [Learn More](https://code.visualstudio.com/docs/getstarted/settings)`,
 				prompt: `User(U) / Workspace(W)`,
 				ignoreFocusOut: true,
-				password: true,
+				// password: true,
 				validateInput: (text) => {
 					if ((['user', 'workspace', 'u', 'w', 'user(u)', 'workspace(w)']).includes(text.toLowerCase())) {
 						return null;

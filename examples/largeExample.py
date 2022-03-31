@@ -1,9 +1,3 @@
-# COMP10001 Foundations in Computing Project 2 Question 5
-# ABRREVIATIONS:
-# -- 'acc' means 'accumulation'
-# -- 'val' means 'value'
-# -- 'freq' means 'frequency'
-
 from collections import defaultdict as dd
 from itertools import combinations
 
@@ -22,91 +16,185 @@ ACC_TOTALS = [34, 55, 68, 76, 81, 84, 86, 87, 88]
 PHASE_GROUPS = {1: [[1], [1]], 2: [[2]], 3: [[6], [6]], 4: [[3], [3]], 
                 5: [[4]], 6: [[6, 7], [6, 7]], 7: [[5], [3]]}
 
-# HELPER FUNCTIONS TO FIND GROUPS
-##############################################################################
 def colour_check(group, aces_check=False):
+    '''
+    Checks if a group of cards is all of the same colour.
+
+    Parameters
+    ----------
+    group : list
+        A list of cards.
+    aces_check : bool
+        Whether or not to check for the presence of aces.
+
+    Returns
+    -------
+    bool
+        Whether or not the group is of the same colour.
+
+    Examples
+    --------
+    >>> colour_check(['2H', '5H', '8H'])
+    True
+
+    '''
     num_cards = len(group)
     colour_dict = dd(int)
-    
-    # store frequency counts of colours in `colour_dict`
+
     for card in group:
         if card in WILDS and not aces_check:
             colour_dict['wilds'] += 1
         else:
             colour_dict[COLOUR[card[SUIT]]] += 1
             
-    # check if the natural and wild cards make up the correct total
     if colour_dict['red'] + colour_dict['wilds'] == num_cards \
         or colour_dict['black'] + colour_dict['wilds'] == num_cards:
         return True
-    
-    # incorrect total - invalid set
+
     return False
 
 def run_check(group, max_wild, ref='', wild_count=0):
-    # BASE: maximum wild count exceeded
+    '''
+    Check if a group of cards is a run.
+
+    Parameters
+    ----------
+    group : list
+        The group of cards to be checked.
+    max_wild : int
+        The maximum number of wilds allowed in the run.
+    ref : str, optional
+        The value of the card that the run should start with. Defaults to ''.
+    wild_count : int, optional
+        The number of wilds in the run. Defaults to 0.
+
+    Returns
+    -------
+    bool
+        True if the group is a run, False otherwise.
+
+    Examples
+    --------
+    >>> run_check(['2C', '3C', '4C', '5C', '6C'], 0)
+    True
+    >>> run_check(['2C', '3C', '4C', '5C', '6C'], 1)
+    True
+    >>> run_check(['2C', '3C', '4C', '5C', '6C'], 2)
+    True
+    >>> run_check(
+    '''
     if wild_count > max_wild:
         return False
 
-    # BASE: finished checking whole group
     elif not group:
         return True
 
-    # wild card - add to the wild count increment reference value
     elif group[0] in WILDS:
         return run_check(group[1:], max_wild,
             RUN_ORDER[RUN_ORDER.index(ref) + 1], wild_count + 1)
 
-    # first card/follows sequence - update reference value for the next card
     elif group[0][VAL] == ref or ref == '':
         return run_check(group[1:], max_wild,
             RUN_ORDER[RUN_ORDER.index(group[0][VAL]) + 1], wild_count)
 
-    # BASE: card no longer follows the run sequence
     return False
 
 def acc_valid(val_list, acc_total=0, acc_list=ACC_TOTALS):
-    # BASE: acc goal surpassed or maximum acc surpassed - invalid
+    '''
+    Validate a given accumulative total against a given list of accumulative totals.
+
+    Parameters
+    ----------
+    val_list : list
+        The list of values to be summed.
+    acc_total : int
+        The current accumulative total.
+    acc_list : list
+        The list of accumulative totals.
+
+    Returns
+    -------
+    bool
+        Whether or not the given accumulative total is valid against the given list of accumulative totals.
+
+    Examples
+    --------
+    >>> acc_valid([1, 2, 3], 0, [3, 4, 5])
+    True
+
+    '''
     if not acc_list or acc_total > acc_list[0]:
         return False
-    
-    # BASE: group completed and goal total reached - complete
     elif not val_list and acc_total == acc_list[0]:
         return True
-    
-    # BASE: group completed but goal not yet reached - incomplete
     elif not val_list and acc_total < acc_list[0]:
         return None
-    
-    # acc goal reached - move on to next goal
     elif acc_total == acc_list[0]:
         return acc_valid(val_list[1:], acc_total + val_list[0], acc_list[1:])
-    
-    # acc goal not yet reached - continue working towards current goal
     elif acc_total < acc_list[0]:
         return acc_valid(val_list[1:], acc_total + val_list[0], acc_list)
 
 
-# HELPER FUNCTIONS TO FIND PHASES
-# -- used in Play Types 1 and 5 to rank cards, and Play Type 3 to find phases
-##############################################################################
 def find_set_phase(hand, phase_type, ranking=True):
+    '''
+    Finds the best set(s) of cards to play for a given phase.
+
+    Parameters
+    ----------
+    hand : list
+        The player's hand.
+    phase_type : int
+        The phase type.
+    ranking : bool, optional
+        Whether or not to rank the set(s) of cards by score.
+
+    Returns
+    -------
+    list
+        The remainder of the player's hand.
+    list
+        The set(s) of cards to play.
+    bool
+        Whether or not the set(s) of cards are complete.
+
+    Examples
+    --------
+    >>> find_set_phase(['3C', '3D', '3H', '3S', '4C', '4D', '4H', '4S', '7C', 
+    ...                 '7D', '7H', '7S', '8C', '8D', '8H', '8S', 'AC', 'AD', 
+    ...                 'AH', 'AS', 'JC', 'JD', 'JH', 'JS', 'KC', 'KD', 'KH', 
+    ...                 'KS', 'QC', 'QD', 'QH', 'QS'], 1)
+    (['3C', '3D', '3H', '3S', '4C', '4D', '4H', '4S', '7C', '7D', '7H', '7S', 
+      '8C', '8D', '8H', '8S', 'AC', 'AD', 'AH', 'AS', 'JC', 'JD', 'JH', 'JS', 
+      'KC', 'KD', 'KH', 'KS', 'QC', 'QD', 'QH', 'QS'], 
+     ['3C', '3D', '3H', '3S', '4C', '4D', '4H', '4S', '7C', '7D', '7H', '7S', 
+      '8C', '8D', '8H', '8S', 'AC', 'AD', 'AH', 'AS', 'JC', 'JD', 'JH', 'JS', 
+      'KC', 'KD', 'KH', 'KS', 'QC', 'QD', 'QH', 'QS'], 
+     False)
+
+    '''
     def find_partial_sets(freq_dict):
         '''
-        Finds 'partial set cards', which are cards with high value/suit 
-        frequencies (but not high enough to be a valid set) and separates 
-        them from '(non-partial) remainders', which are the cards of the lowest
-        frequency.
-        Arguments:
-            freq_dict(dd): either a val dict or suit dict, depending on phase
-                -- phases 1, 4, 7: {val1: [cards of val1], ...} 
-                -- phase 2: {suit1: [cards of suit1], ...} 
-        Returns:
-            partials(list): list of 'partial set cards'
-            remainder(list): list of remaining cards in hand after 
-                partials are removed
+        Finds partial sets.
+
+        Parameters
+        ----------
+        freq_dict : dict
+            A dictionary of card values and their frequencies.
+
+        Returns
+        -------
+        list
+            A list of partial sets.
+        list
+            A list of remaining cards.
+
+        Examples
+        --------
+        >>> find_partial_sets({'A': 4, '2': 2, '3': 2, '4': 2, '5': 1})
+        [['A', 'A', 'A', 'A'], ['2', '2', '2', '5'], ['3', '3', '4', '4']]
+        [['5']]
+    
         '''
-        # find the lowest frequency in `freq_dict`
         lengths_list = [len(card_list) for card_list in 
             list(freq_dict.values())]
         lowest_freq = min(lengths_list)
@@ -115,29 +203,18 @@ def find_set_phase(hand, phase_type, ranking=True):
         partials = []
         scores_dict = dd(int)
 
-        # (i) Rank keys by frequency
         for key, card_list in list(freq_dict.items()):
-
-            # add keys of lowest frequency to `remainder`
             if len(card_list) == lowest_freq:
                 freq_dict.pop(key)
                 remainder += card_list
-            
-            # partials' keys - calculate total score value for tie breaking
             else:
                 total_score_val = 0
                 for card in card_list:
                     total_score_val += SCORE_VALUES[card[VAL]]
                 scores_dict[key] = total_score_val
-
-        # (ii) Tie break by total score value
-        # sort from lowest_freq to largest score val
         partial_item_list = sorted(list(freq_dict.items()), key=lambda item: 
                                     (-len(item[1]), scores_dict[item[0]]))
-
-        # unpack `partial_item_list`(dd item list) --> `partials`(list)
         for key, card_group in partial_item_list:
-            # (3) Rank individual cards by 
             card_group.sort(key=lambda c: SCORE_VALUES[c[VAL]])
             for card in card_group:
                 partials.append(card)
@@ -149,13 +226,9 @@ def find_set_phase(hand, phase_type, ranking=True):
     group_len = phase_dict[phase_type][0]
     phase_len = phase_dict[phase_type][1]
     mode  = phase_dict[phase_type][2]
-
-    # sort from largest to smallest accumulation value
     hand.sort(key=lambda c: -ACC_VALUES[c[VAL]])
 
     freq_dict = dd(list)
-
-    # store frequency counts of values/suits in `freq_dict`
     for card in hand:
         if card in WILDS:
             freq_dict['wild'].append(card)
@@ -166,98 +239,107 @@ def find_set_phase(hand, phase_type, ranking=True):
     phase_list = []
     remainder = []
 
-    # (a) Complete Groups without Wilds
     for key, card_list in list(freq_dict.items())[:]:
-        # phase complete - stop finding phases
         if len(phase_list) == phase_len:
             break
-        # findng complete groups without wilds
-        # -- check if frequency of card makes up group length
         elif key!='wild' and len(card_list) >= group_len:
             phase_list.append(card_list[:group_len])
             freq_dict[key] = card_list[group_len:]
 
-    # (b) Complete Groups with Wilds
     for key, card_list in list(freq_dict.items())[:]:
-
-        # phase complete - stop finding phases
         if len(phase_list) == phase_len:
             break
-
-        # finding complete groups with wilds
-        # -- check if the sum of natural and wild cards make up group length
         elif key != 'wild' and len(card_list) >= MIN_NATURAL \
             and len(card_list) + len(freq_dict['wild']) >= group_len \
                 and len(phase_list) < phase_len:
-            
-            # group found - add to phase list
             new_card_list = card_list + freq_dict['wild'][:group_len
                 - len(card_list)]
             phase_list.append(new_card_list)
-
-            # update wild frequency
             freq_dict['wild'] = freq_dict['wild'][group_len - len(card_list):]
             freq_dict.pop(key)
-
-    # check if phase is complete, partially complete or incomplete
-    # -- update phase_complete flag and remainder list
     if len(phase_list) == phase_len:
         phase_complete = True
     elif 0 < len(phase_list) < phase_len:
         phase_complete = None
     else:
         phase_complete = False
-
-    # update remainder when not ranking
     if not ranking:
         if phase_complete:
             remainder = flatten(list(freq_dict.values()))
         else:
             remainder = hand
-
     else: 
-        # flatten phase list to 1 dimentional list
         phase_list = flatten(phase_list)
-
-        # (c) Wild Cards
-        # go through cards in `freq_dict` (dict)
         for key, _ in list(freq_dict.items())[:]:
-
-            # find remaining wild cards
-            # -- add wild cards to the `phase_list`
             if key == 'wild' and freq_dict[key]:
                 phase_list += freq_dict[key]
-                
-                # remove wilds from initial remainder
                 freq_dict.pop('wild')
-
-            # remove empty frequencies
             elif not freq_dict[key]:
                 freq_dict.pop(key)
-
-        # (d) Partially Complete Groups
         if freq_dict:
             partial_set_cards, remainder = find_partial_sets(freq_dict)
-
-            # add partial set cards to `phase_list`
             phase_list += partial_set_cards
 
     return remainder, phase_list, phase_complete
 
 def find_acc_phase(hand, phase_type, ranking=True):
+    '''
+    Finds the best possible set of cards to play in a trick.
+
+    Parameters
+    ----------
+    cards : list
+        The cards you have available to play in the trick.
+    mode : str
+        The mode of play.
+
+    Returns
+    -------
+    tuple
+        A tuple containing 3 lists:
+            - The list of cards to play in the trick.
+            - The list of cards not played in the trick.
+            - The list of cards to save for a later trick.
+
+    Examples
+    --------
+    >>> find_acc_group([('H', 'A'), ('H', 'K'), ('H', 'Q'), ('H', 'J'), ('H', '10'), ('H', '9')], 'short')
+    ([('H', 'A'), ('H', 'K'), ('H', 'Q'), ('H', 'J')], [('H', '10'), ('H', '9')], [])
+
+    '''
     def find_acc_group(cards, mode):
-        # shortest and longest combination lengths
+        '''
+        Finds the best possible set of cards to play in a trick.
+
+        Parameters
+        ----------
+        cards : list
+            The cards you have available to play in the trick.
+        mode : str
+            The mode of play.
+
+        Returns
+        -------
+        tuple
+            A tuple containing 3 lists:
+                - The list of cards to play in the trick.
+                - The list of cards not played in the trick.
+                - The list of cards to save for a later trick.
+
+        Examples
+        --------
+        >>> find_acc_group([('H', 'A'), ('H', 'K'), ('H', 'Q'), ('H', 'J'), ('H', '10'), ('H', '9')], 'short')
+        ([('H', 'A'), ('H', 'K'), ('H', 'Q'), ('H', 'J')], [('H', '10'), ('H', '9')], [])
+    
+        '''
         shortest = 3
         longest = min(8, len(cards))
 
-        # setting the order of combination sizes for each mode
         if mode == 'short':
             combination_sizes = range(shortest, longest)
         else:
             combination_sizes = range(longest, shortest - 1, -1)
-        
-        # sort from smallest to largest accumulation value
-        # -- gets rid of more cards
+
         cards.sort(key=lambda c: ACC_VALUES[c[VAL]])
 
         group_found = False
@@ -265,39 +347,25 @@ def find_acc_phase(hand, phase_type, ranking=True):
         group_remainder = []
         promising_diff = 0
 
-        # create combination of cards in hand
-        # -- from shortest/longest combination (depending on `mode`)
         for r in combination_sizes:
             try:
                 for comb in combinations(cards, r):
-                    # check if the combination is a valid group totalling 34
                     acc_values = [ACC_VALUES[card[VAL]] for card in comb]
                     difference = sum(acc_values) - ACC_TOTALS[0]
                     if not difference:
 
-                        # group 7 also needs to be same colour
                         if group_type == 7:
                             if not colour_check(comb, True):
                                 continue
 
-                        # group found
-                        # valid accumulation group found - add to `phase_list`
                         acc_group = list(comb)
-                        
-                        # set group_found flag
                         group_found = True
 
                         raise StopIteration
-
-                    # check if combination is closest to 34
                     elif difference <= promising_diff:
                         acc_group = list(comb)
-
-            # break out of both loops when group found
             except StopIteration:
                 break
-
-        # add remaining cards to `remainder`(list)
         group_remainder = []
         for card in cards:
             if card not in acc_group:
@@ -310,29 +378,20 @@ def find_acc_phase(hand, phase_type, ranking=True):
 
     phase_list = []
     modes_list = ['long', 'short']
-
-    # start by trying to find 2 long groups (longest possible acc phase)
-    # if unsuccessful, then try to find 1 short and 1 long group
     for mode in modes_list:
         group_2_found = False
 
-        # (1) Find 1st group
         group_1_found, group_1_remainder, group_1 = find_acc_group(hand, mode)
 
-        # (2*) Find 2nd group - *only if first group found
         if group_1_found:
             group_2_found, remainder, group_2 = \
                 find_acc_group(group_1_remainder, 'long')
 
-        # both groups found - Phase is Complete
         if group_2_found:
-            # add both groups to phase list
             phase_list.append(group_1)
             phase_list.append(group_2)
 
             phase_complete = True
-
-            # break out of phase-finding loop
             break
 
         # 1 group found - Partial Phase Found

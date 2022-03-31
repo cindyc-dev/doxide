@@ -169,7 +169,7 @@ export class DoxideCodeLensProvider implements CodeLensProvider {
         
         var text = editor.document.getText(lens.contentRange);
         lens.command = {
-            title: "Generate",
+            title: workspace.getConfiguration("doxide").get("codeLens.generateTitle") || "Generate",
             tooltip: "Generate a Docstring for this function.",
             command: "doxide.generateDocstring",
             arguments: [text, lens.range.start.line],

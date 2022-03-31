@@ -1,10 +1,40 @@
 import pandas as pd
 
 def helloworld():
+    '''
+    Prints "Hello, world!" to the console.
+
+    Returns
+    -------
+   
+    '''
     print("Hello, world!")
 
-
 def randomly_split_dataset(folder, filename, split_ratio=[0.8, 0.2]):
+    '''
+    Split a dataset into train and test set.
+
+    Parameters
+    ----------
+    folder : str
+        The folder where the dataset is located.
+    filename : str
+        The name of the dataset file.
+    split_ratio : list, optional
+        The ratio of train set to the whole dataset, by default [0.8, 0.2]
+
+    Returns
+    -------
+    None
+        The function only prints the location of the generated train and test set.
+
+    Examples
+    --------
+    >>> randomly_split_dataset('finetune_data/', 'dataset.jsonl')
+    Train set is saved in finetune_data/train.jsonl
+    Test set is saved in finetune_data/test.jsonl
+
+    '''
     df = pd.read_json(folder + filename, lines=True)
     train_name, test_name = "train.jsonl", "test.jsonl"
     df_train, df_test = train_test_split(df, test_size=split_ratio[1], random_state=42)
