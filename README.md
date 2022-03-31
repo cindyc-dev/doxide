@@ -14,7 +14,7 @@
 
 ---
 ## 🔨 Getting Started
-* To use this extension, you must have an OpenAI API Key
+* To use this extension, you must have an OpenAI API Key (which can be found on the [OpenAI Website > Account > User > API Keys](https://beta.openai.com/account/api-keys))
   * ![](/media/KeySetup.gif)
   * NOTE: you can also paste your key into your User/Workspace Settings directly (`doxide.openAI.apiKey`)
 
