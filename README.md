@@ -1,8 +1,6 @@
 <h1 align="center"><b>Doxide</b></h1>
 
 > 🤖 Automate code documentation with OpenAI-Codex
-
-![](/assets/Banner.gif)
 ---
 <details>
 <summary>Table of Contents</summary>
