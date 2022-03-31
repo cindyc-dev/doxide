@@ -1,10 +1,11 @@
-import { commands, Disposable, window, languages, workspace, ProgressLocation, Range } from "vscode";
+import { commands, Disposable, window, languages, workspace, ProgressLocation, Range, Position } from "vscode";
 import { DoxideCodeLensProvider } from "./CodeLensProvider";
 import { openaiGenerateDocstring } from "./openai";
 
-
 let disposables: Disposable[] = [];
-
+/**
+ * @example
+ */
 export function activate() {
 	console.log(`🤖 Doxide extension is activated!`);
 	
@@ -14,6 +15,7 @@ export function activate() {
 		.getConfiguration("doxide")
 		.get("openAI.apiKey");
 	console.log(`authKey: ${authKey}`);
+
 	// Check if OpenAI API Key is set
 	if (!authKey || authKey === undefined) {
 		showAuthKeyWarningMessage();
@@ -31,6 +33,7 @@ export function activate() {
 	// Create and register CodeLensProvider (only for Python, for now)
 	const codeLensProvider = new DoxideCodeLensProvider();
 	languages.registerCodeLensProvider("python", codeLensProvider);
+	languages.registerCodeLensProvider("javascript", codeLensProvider);
 
 	// Command to enable CodeLenses
 	commands.registerCommand("doxide.enableCodeLens", () => {
@@ -45,7 +48,6 @@ export function activate() {
 		workspace.getConfiguration("doxide").update("codeLens.enabled", false);
 		window.showInformationMessage(`Doxide: CodeLens Disabled.`);
 	});
-
 	
 	// Command that promps user to Enter their OpenAI API Key
 	commands.registerCommand("doxide.setOpenAIapiKey", () => {
@@ -123,7 +125,13 @@ export function activate() {
 		}
 
 		// Command not called using CodeLens
-		if ((!text || text === undefined) && insertionLine === -1) {
+		if (!text || text === undefined || insertionLine === -1) {
+			console.log("YES");
+			const editor = window.activeTextEditor;
+			if (!editor) { return; }
+			text = editor.document.getText(editor.selection);
+			insertionLine = editor.selection.start.line;
+			console.log(`text: ${text}, insertionLine: ${insertionLine}`);
 			
 		}
 
